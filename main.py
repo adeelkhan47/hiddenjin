@@ -6,10 +6,29 @@ from email_validator import validate_email, EmailNotValidError
 from io import StringIO
 import logging
 import time
+import base64
 
 # ------------- CONFIG -----------------
-st.set_page_config(page_title="HIDDENJIN Email Processor", layout="wide")
-st.title("📧 HIDDENJIN Email Processor")
+st.set_page_config(page_title="HIDDENJINN Email Processor", layout="wide")
+
+# Display logo
+def get_base64_image(image_path):
+    with open(image_path, "rb") as image_file:
+        encoded = base64.b64encode(image_file.read()).decode()
+    return f"data:image/png;base64,{encoded}"
+
+# Assuming logo.png is in the same directory as the script
+logo_path = "logo.png"
+try:
+    logo_base64 = get_base64_image(logo_path)
+    st.markdown(
+        f'<img src="{logo_base64}" style="display: block; margin-left: auto; margin-right: auto; width: 300px; padding-bottom: 20px;">',
+        unsafe_allow_html=True
+    )
+except FileNotFoundError:
+    st.warning("⚠️ logo.png not found. Please ensure the file is in the same directory as the script.")
+
+st.title("📧 HIDDENJINN Email Processor")
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -88,7 +107,6 @@ mx_provider_map = {
     "mx.tutanota.de": "Tutanota",
 }
 
-
 # ------------- UTIL FUNCTIONS -----------------
 
 def is_valid_format(email):
@@ -97,7 +115,6 @@ def is_valid_format(email):
         return True
     except EmailNotValidError:
         return False
-
 
 async def has_mx_record(domain):
     try:
@@ -108,7 +125,6 @@ async def has_mx_record(domain):
     except Exception as e:
         logger.warning(f"MX query failed for {domain}: {str(e)}")
         return False, []
-
 
 def detect_provider(domain, mx_records=None):
     domain = domain.lower().strip()
@@ -133,16 +149,13 @@ def detect_provider(domain, mx_records=None):
 
     return "Other"
 
-
 def detect_country(domain):
     tld = domain.split('.')[-1] if '.' in domain else ''
     return tld.upper() if len(tld) == 2 else 'INTL'
 
-
 def contains_banned_keywords(email):
     email_lower = email.lower()
     return any(bad_word in email_lower for bad_word in banned_keywords)
-
 
 async def validate_batch(emails, domains, mx_cache):
     results = []
@@ -186,7 +199,6 @@ async def validate_batch(emails, domains, mx_cache):
 
     return results
 
-
 async def process_emails(df, batch_size=100):
     emails = df['Email'].tolist()
     domains = [email.partition("@")[2] for email in emails]
@@ -222,7 +234,6 @@ async def process_emails(df, batch_size=100):
         logger.info(f"Batch {i // batch_size + 1} took {time.time() - start_time:.2f} seconds")
 
     return output
-
 
 # ------------- MAIN APP -----------------
 
