@@ -22,7 +22,6 @@ banned_keywords = [
     "nobody", "support", "help", "info", "information", "contact", "service"
 ]
 
-# Expanded provider dictionary with regional and subdomain variations
 common_providers = {
     # Google
     "gmail.com": "Google",
